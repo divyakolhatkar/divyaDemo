@@ -1,0 +1,87 @@
+Apex class 
+ public class controllerSearch{
+@auraEnabled 
+public static List<Account> getAccount(String params)
+ 
+return [SELECT Id,name,Phone,Industry from Account Where Industry:=params];
+
+}
+}
+
+/***************************************/
+Event :AccountEvent1.evt
+
+<aura:event type="Component" description="Event template" >
+<aura:attribute name="SearchKey" type="String" />
+</aura:event>
+
+/********************************************/
+Component :AccountC1.cmp
+<aura:component>
+
+<aura:attribute name="SearchKey" type="String" />
+<aura"registerEvent name="first" type="c:AccountEvent"/>
+
+<div>
+<table>
+<tr>
+<td><b>Industry</b>
+<td><lightning:input value="{!v.SearchKey}" />
+</td>
+<lightning:button label="Search" onclick="{!c.searchData}"
+</tr>
+</table>
+</div>
+</aura:component>
+/*********************************************/
+
+AccountC1.js
+{(
+searchData :function(component,helper,event)
+{
+	var skey =component.get("v.searchKey");
+	var evt =component.getEvent("first");
+	evt.setParam({"searchKey":skey});
+
+}
+)}
+/********************************************/
+
+AccountP1.cmp
+<aura:component controller="controllerSearch" >
+<aura:attribute name="lstAccount" type="List" />
+<aura:attribute name="Mycolumns" type="List" />
+<aura:attribute name="flag" type="boolean" />
+
+<aura:handler name="first" event="c:AccountEvent1" action="{!c.displayAccount}" />
+<c:AccountP1 />
+
+<aura:if isTrue="{!v.flag}" />
+<div>
+<lightning:datatable
+	keyFeild ="Id"
+	data="{!v.lstAccount}"
+	coloumn="{!v.Mycolumns}"
+</div>
+</aura:if>
+</aura:component>
+/********************************************/
+
+{(
+displayAccount :function(component,event,helper)
+{
+
+var cols=[
+	{label:"Account name",fieldName:"Name",type="text"}
+	{label:"Account Phone",fieldName:"Phone",type="text"}
+	{label:"Account Industry",fieldName:"Industry",type="text"}
+];
+
+	component.set("v.Mycolumns",cols);
+
+	var skey =event.getParams("searchkey");
+	var action =component.get("c.getAccounts");
+
+
+
+)}
